@@ -275,3 +275,5 @@ added via a button like this one:
 <onclick>RunScript(script.tv.show.next.aired,updateshow=$INFO[ListItem.Label])</onclick>
 <visible>Container.Content(tvshows)</visible>
 </control>
+
+Codacy Badge
