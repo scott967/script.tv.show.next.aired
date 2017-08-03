@@ -1,25 +1,21 @@
+script.tv.show.next.aired
+Version 7.x - renewed version by marcelveldt using the new TVDB api
+Based on the original work and contributions by Ppic, Frost, ronie, `Black, phil65 and offcourse WayneD
 
 How to use this addon in your skin:
 
-I) Startup.xml:
-Beginning with 6.0.10 there is no longer any need to run the next-aired script
-in the skin's Startup.xml.  Skins that have the old call should start to remove
-this soon (allowing 6.0.10 to propagate first).
+I) Window Properties for shows airing today
 
-The script now uses an xbmc.service to start up the background updater that
-will scan your library and fetch next-aired info for your shows.
-
-For shows that are airing today, the script will set the window properties
+For all shows that are airing today, the script will set the window properties
 listed below.
 
 Window(Home).Property(NextAired.%d.*):
 Label               (tv show name)
 Thumb               (tv show icon)
 AirTime             (eg. 'Wednesday, Thursday: 9:00 pm')
-Path                (tv show path)
+Path                (tv show path on disk)
 Library             (eg. videodb://2/2/1/ or videodb://tvshows/titles/1/)
 Status              (eg. 'New Series'/'Returning Series'/'Cancelled/Ended')
-StatusID            (ID of the status)
 Network             (name of the tv network that's airing the show)
 Started             (airdate of the first episode, eg. 09/24/07, 'Mon, Sep 24, 2007', etc.)
 Classification      (type of show, eg. Reality, Mini-Series, etc. Data is also in Genre.)
@@ -28,7 +24,6 @@ Premiered           (year the first episode was aired, eg. '1999')
 Country             (production country of the tv show, eg. 'USA')
 Runtime             (duration of the episode in minutes)
 Fanart              (tv show fanart)
-AirsToday           (will return 'True' if the show is aired today, otherwise 'False'; deprecated alias: "Today")
 NextDate            (date the next episode will be aired)
 NextDay             ("nice" localized format for NextDate, eg. "Wed, Jun 11" or "Mon, Jan 26, 2015")
 NextTitle           (name of the next episode)
@@ -43,30 +38,24 @@ LatestEpisodeNumber (episode number of the last episode)
 LatestSeasonNumber  (season number of the last episode)
 AirDay              (day(s) of the week the show is aired, eg 'Tuesday')
 ShortTime           (time the show is aired, eg. "20:00" or "8:00 pm")
-SecondWeek          (1 == show is in the second week of the Monday-week Guide, otherwise 0)
 Art(poster)         (tv show poster)
 Art(banner)         (tv show banner)
 Art(fanart)         (tv show fanart)
-Art(landscape)      (tv show landscape - artwork downloader required)
-Art(clearlogo)      (tv show logo - artwork downloader required)
-Art(clearart)       (tv show clearart - artwork downloader required)
-Art(characterart)   (tv show characterart - artwork downloader required)
+Art(landscape)      (tv show landscape - if available)
+Art(clearlogo)      (tv show logo - if available)
+Art(clearart)       (tv show clearart - if available)
+Art(characterart)   (tv show characterart - if available)
 
-Status IDs:
-0 - Returning Series
-1 - Cancelled/Ended
-2 - TBD/On The Bubble
-4 - New Series
-6 - Final Season
--1 - Undefined
+Replace %d with a number, start counting from 0.
+E.g. Window(Home).Property(NextAired.0.Label)
 
----
-
+Totals:
 Window(Home).Property(NextAired.*):
 Total               (number of running shows)
 TodayTotal          (number of shows aired today)
 TodayShow           (list of shows aired today)
 
+---------------------------------------------------------------------------------
 
 II) MyVideoNav.xml:
 
@@ -104,13 +93,12 @@ example code:
 	</control>
 </control>
 
-Beginning with Next-Aired 6.0.10 the backend option can be specified as 2
-space-separated numbers to specify how many ListItems should be checked and
-turned into corresponding NextAired properties.  For example, if you specify
-"backend=-2 3" then the ListItem(-2).TVShowTitle, ListItem(-1).TVShowTitle,
-ListItem.TVShowTitle, ListItem(1).TVShowTitle, ListItem(2).TVShowTitle, and
-ListItem(3).TVShowTitle shows will all be turned into NextAired(-2).PROPERTY
-through NextAired(3).PROPERTY values.
+The backend option can be specified as 2 space-separated numbers to specify 
+how many ListItems should be checked and turned into corresponding NextAired properties.  
+For example, if you specify "backend=-2 3" then the ListItem(-2).TVShowTitle, 
+ListItem(-1).TVShowTitle, ListItem.TVShowTitle, ListItem(1).TVShowTitle, 
+ListItem(2).TVShowTitle, and ListItem(3).TVShowTitle shows will all be turned 
+into NextAired(-2).PROPERTY through NextAired(3).PROPERTY values.
 
 Note that if the list is shorter than the number of requested values, some
 of the items will be left unpopulated in a balanced manner (first forward
@@ -217,20 +205,52 @@ day num (e.g. "Feb 14" & "14 Feb" are 2 typical localized formats):
     Window(home).Property(NextAired.215.Date)
 
 A list of available infolabels:
-    ListItem.Label          (tv show name)
-    ListItem.Thumb          (tv show thumb)
-    ListItem.Property(*)    (see above)
+    ListItem.Label                         (tv show name)
+    ListItem.Thumb                         (tv show thumb)
+    ListItem.Title                         (name of the airing next episode)
+    ListItem.TvshowTitle                   (tv show name)
+    ListItem.Studio                        (name of the tv network that's airing the show)
+    ListItem.Genre                         (genre of the show)
+    ListItem.FirstAired                    (airdate of the episode)
+    ListItem.Runtime                       (duration of the episode in minutes)
+    ListItem.Episode                       (episode number of the next episode)
+    ListItem.Season                        (season number of the next episode)
+    ListItem.Art(poster)                   (tv show poster)
+    ListItem.Art(banner)                   (tv show banner)
+    ListItem.Art(fanart)                   (tv show fanart)
+    ListItem.Art(landscape)                (tv show landscape - if available)
+    ListItem.Art(clearlogo)                (tv show logo - if available)
+    ListItem.Art(clearart)                 (tv show clearart - if available)
+    ListItem.Art(characterart)             (tv show characterart - if available)
+    ListItem.Property(AirTime)             (eg. 'Wednesday, Thursday: 9:00 pm')
+    ListItem.Property(Path)                (tv show path on disk)
+    ListItem.Property(Library)             (eg. videodb://2/2/1/ or videodb://tvshows/titles/1/)
+    ListItem.Property(Status)              (eg. 'New Series'/'Returning Series'/'Cancelled/Ended')
+    ListItem.Property(Network)             (name of the tv network that's airing the show)
+    ListItem.Property(Started)             (airdate of the first episode, eg. 09/24/07, 'Mon, Sep 24, 2007', etc.)
+    ListItem.Property(Classification)      (type of show, eg. Reality, Mini-Series, etc. Data is also in Genre.)
+    ListItem.Property(Genre)               (genre of the show)
+    ListItem.Property(Premiered)           (year the first episode was aired, eg. '1999')
+    ListItem.Property(Runtime)             (duration of the episode in minutes)
+    ListItem.Property(AirsToday)           (will return 'True' if the show is aired today, otherwise 'False'; deprecated alias: "Today")
+    ListItem.Property(NextDate)            (date the next episode will be aired)
+    ListItem.Property(NextDay)             ("nice" localized format for NextDate, eg. "Wed, Jun 11" or "Mon, Jan 26, 2015")
+    ListItem.Property(NextTitle)           (name of the airing next episode)
+    ListItem.Property(NextNumber)          (season/episode number of the next episode, eg. '04x01')
+    ListItem.Property(NextEpisodeNumber)   (episode number of the next episode, eg. '04')
+    ListItem.Property(NextSeasonNumber)    (season number of the next episode, eg. '01')
+    ListItem.Property(LatestDate)          (date the last episode was aired)
+    ListItem.Property(LatestDay)           ("nice" localized format for LatestDate, eg. "Wed, Jun 11" or "Mon, Jan 26, 2015")
+    ListItem.Property(LatestTitle)         (name of the last episode)
+    ListItem.Property(LatestNumber)        (season/episode number of the last episode)
+    ListItem.Property(LatestEpisodeNumber) (episode number of the last episode)
+    ListItem.Property(LatestSeasonNumber)  (season number of the last episode)
+    ListItem.Property(AirDay)              (day(s) of the week the show is aired, eg 'Tuesday')
+    ListItem.Property(ShortTime)           (time the show is aired, eg. "20:00" or "8:00 pm")
+    ListItem.Property(SecondWeek)          (1 == show is in the second week of the Monday-week Guide, otherwise 0)
 
 Totals are available using the window properties listed above.
 
-Thumb type selected by the user (0=poster, 1=banner, 2=logo):
-    Window(home).Property(TVGuide.ThumbType)
-
-Indicator for background fanart setting (1=enabled, empty if disabled):
-    Window(home).Property(TVGuide.BackgroundFanart)
-
-Indicator for 16:9-thumbs setting (1=enabled, empty if disabled):
-    Window(home).Property(TVGuide.PreviewThumbs)
 
 All other IDs and properties in the default script window are optional and not
 required by the script.
@@ -238,6 +258,7 @@ required by the script.
 
 IV) To force an update of the nextaired database ahead of its next scheduled time:
 RunScript(script.tv.show.next.aired,force=True)
+
 
 To force an update as well as reset all the existing data (forcing a fresh scan
 of everything) use the reset option:
