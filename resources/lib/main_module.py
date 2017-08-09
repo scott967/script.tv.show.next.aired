@@ -103,11 +103,11 @@ class MainModule:
             log_msg("Retrieving next airing episodes for all continuing Kodi tv shows...", xbmc.LOGNOTICE)
             want_yesterday = self.addon.getSetting("WantYesterday") == 'true'
             self.thetvdb.get_kodi_unaired_episodes(include_last_episode=want_yesterday)
-            #set the window properties for the shows that are airing today
+            # set the window properties for the shows that are airing today
             prev_total = self.win.getProperty("NextAired.TodayTotal")
             prev_total = int(prev_total) if prev_total else 0
             # clear previous properties
-            for count in range(prev_total+1):
+            for count in range(prev_total + 1):
                 self.clear_properties("%s." % count)
             shows_airing_today = self.thetvdb.get_kodishows_airingtoday()
             all_titles = []
@@ -161,7 +161,7 @@ class MainModule:
         log_msg("Monitoring of listitems started...")
         self.win.setProperty("NextAired.backend", "running")
         try:
-            
+
             # try parsing the multi-attributes
             li_range_left, li_range_right = self.get_listitem_range(action_param)
             monitor = xbmc.Monitor()
@@ -189,7 +189,7 @@ class MainModule:
         finally:
             self.win.clearProperty("NextAired.backend")
         log_msg("Monitoring of listitems ended...")
-                
+
     @staticmethod
     def get_listitem_range(paramstr):
         '''get the special range params from the parameter string'''
@@ -231,14 +231,20 @@ class MainModule:
         else:
             # clear next episode properties if we don't have that data
             for prop in ["NextDate", "NextDay", "NextTitle", "NextNumber", "NextEpisodeNumber", "NextSeasonNumber"]:
-                self.win.clearProperty("NextAired%s.%s" %(prefix, prop))
-        self.win.setProperty("NextAired%s.LatestDate" % prefix, details["last_episode"]["airdate"])
-        self.win.setProperty("NextAired%s.LatestDay" % prefix, details["last_episode"]["airdate.long"])
-        self.win.setProperty("NextAired%s.LatestTitle" % prefix, details["last_episode"]["title"])
-        nextnumber = "%sx%s" % (details["last_episode"]["season"], details["last_episode"]["episode"])
-        self.win.setProperty("NextAired%s.LatestNumber" % prefix, nextnumber)
-        self.win.setProperty("NextAired%s.LatestEpisodeNumber" % prefix, str(details["last_episode"]["episode"]))
-        self.win.setProperty("NextAired%s.LatestSeasonNumber" % prefix, str(details["last_episode"]["season"]))
+                self.win.clearProperty("NextAired%s.%s" % (prefix, prop))
+        if details.get("last_episode"):
+            self.win.setProperty("NextAired%s.LatestDate" % prefix, details["last_episode"]["airdate"])
+            self.win.setProperty("NextAired%s.LatestDay" % prefix, details["last_episode"]["airdate.long"])
+            self.win.setProperty("NextAired%s.LatestTitle" % prefix, details["last_episode"]["title"])
+            nextnumber = "%sx%s" % (details["last_episode"]["season"], details["last_episode"]["episode"])
+            self.win.setProperty("NextAired%s.LatestNumber" % prefix, nextnumber)
+            self.win.setProperty("NextAired%s.LatestEpisodeNumber" % prefix, str(details["last_episode"]["episode"]))
+            self.win.setProperty("NextAired%s.LatestSeasonNumber" % prefix, str(details["last_episode"]["season"]))
+        else:
+            # clear last episode properties if we don't have that data
+            for prop in ["LatestDate", "LatestDay", "LatestTitle",
+                         "LatestNumber", "LatestEpisodeNumber", "LatestSeasonNumber"]:
+                self.win.clearProperty("NextAired%s.%s" % (prefix, prop))
         self.win.setProperty("NextAired%s.Airday" % prefix, details["airday"])
         self.win.setProperty("NextAired%s.ShortTime" % prefix, details["airtime"])
         self.win.setProperty("NextAired%s.Art(poster)" % prefix, details["art"].get("poster"))
@@ -248,7 +254,7 @@ class MainModule:
         self.win.setProperty("NextAired%s.Art(clearlogo)" % prefix, details["art"].get("clearlogo"))
         self.win.setProperty("NextAired%s.Art(characterart)" % prefix, details["art"].get("characterart"))
 
-    def clear_properties(self, prefix=None):
+    def clear_properties(self, prefix=""):
         '''clears the nextaired window Properties'''
         props = ["label", "thumb", "airtime", "path", "library", "status", "statusid", "network", "started",
                  "classification", "genre", "premiered", "country", "runtime", "fanart", "airstoday", "nextdate",
