@@ -125,7 +125,6 @@ class NextAiredDialog(xbmcgui.WindowXML):
         elif controlID in self.cntr_nums:
             listitem = self.getControl(controlID).getSelectedItem()
             filename = 'ActivateWindow(Videos,%s,return)' % listitem.getProperty('Path')
-            log_msg(filename)
             xbmc.executebuiltin(filename)
 
     def onFocus(self, controlID):
