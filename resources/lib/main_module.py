@@ -7,15 +7,18 @@
     main_module.py
     All script methods provided by the addon
 '''
-
+import os, sys
 import xbmc
 import xbmcgui
 import xbmcaddon
 from thetvdb import TheTvDb
-from utils import ADDON_ID, log_msg, KODI_VERSION, log_exception, DATE_FORMAT, NICE_DATE_FORMAT, NICE_DATE_NO_YEAR, NICE_SHORT_DATE
+from resources.lib.utils import ADDON_ID, log_msg, KODI_VERSION, log_exception, DATE_FORMAT, NICE_DATE_FORMAT, NICE_DATE_NO_YEAR, NICE_SHORT_DATE
 from datetime import datetime, date, timedelta
 from time import strftime, strptime, time, mktime, localtime, tzname
-import urlparse
+if sys.version_info.major == 3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 import sys
 
 
@@ -80,7 +83,7 @@ class MainModule:
         '''reset and force update of all data'''
         if action_param == "true":
             dialog = xbmcgui.Dialog()
-            heading = self.addon.getAddonInfo("name").decode("utf-8")
+            heading = self.addon.getAddonInfo("name")
             if dialog.yesno(heading, self.addon.getLocalizedString(32213)):
                 dialog = xbmcgui.DialogProgress()
                 dialog.create(heading, self.addon.getLocalizedString(32214))
@@ -95,12 +98,12 @@ class MainModule:
         else:
             self.win.setProperty("nextaired.update_data", "busy")
             # build details in cache for all continuing series in the kodi db
-            log_msg("Updating TheTVDB info for all continuing Kodi tv shows...", xbmc.LOGNOTICE)
+            log_msg("Updating TheTVDB info for all continuing Kodi tv shows...", xbmc.LOGINFO)
             self.thetvdb.ignore_cache = ignore_cache
             continuing_kodi_shows = self.thetvdb.get_kodishows_details(continuing_only=True)
             self.win.setProperty("NextAired.Total", "%s" % len(continuing_kodi_shows))
             # build nextaired episodes listing in cache
-            log_msg("Retrieving next airing episodes for all continuing Kodi tv shows...", xbmc.LOGNOTICE)
+            log_msg("Retrieving next airing episodes for all continuing Kodi tv shows...", xbmc.LOGINFO)
             want_yesterday = self.addon.getSetting("WantYesterday") == 'true'
             self.thetvdb.get_kodi_unaired_episodes(include_last_episode=want_yesterday)
             # set the window properties for the shows that are airing today
@@ -118,13 +121,13 @@ class MainModule:
             self.win.setProperty("NextAired.TodayShow", "[CR]".join(all_titles))
             self.thetvdb.ignore_cache = False
             self.win.clearProperty("nextaired.update_data")
-            log_msg("Update complete", xbmc.LOGNOTICE)
+            log_msg("Update complete", xbmc.LOGINFO)
 
     def force(self, action_param):
         '''force update of data by script - calls update_data after user confirmation'''
         if action_param == "true":
             dialog = xbmcgui.DialogProgress()
-            dialog.create(self.addon.getAddonInfo("name").decode("utf-8"), self.addon.getLocalizedString(32215))
+            dialog.create(self.addon.getAddonInfo("name"), self.addon.getLocalizedString(32215))
             self.update_data()
             dialog.close()
             del dialog
@@ -167,14 +170,14 @@ class MainModule:
             monitor = xbmc.Monitor()
             last_showtitle = ""
             while not monitor.abortRequested() and xbmc.getCondVisibility("Window.IsActive(10025)"):
-                showtitle = xbmc.getInfoLabel("ListItem.TvShowTitle").decode("utf-8")
+                showtitle = xbmc.getInfoLabel("ListItem.TvShowTitle")
                 if showtitle != last_showtitle:
                     last_showtitle = showtitle
                     self.tvshowtitle(showtitle)
                     if li_range_left or li_range_right:
                         # set properties for the given listitem range
                         for count in range(li_range_left, li_range_right):
-                            showtitle = xbmc.getInfoLabel("ListItem(%s).TvShowTitle" % count).decode("utf-8")
+                            showtitle = xbmc.getInfoLabel("ListItem(%s).TvShowTitle" % count)
                             self.tvshowtitle(showtitle, "(%s)" % count)
                 monitor.waitForAbort(0.5)
             # clear properties when exiting video library
@@ -278,13 +281,13 @@ class MainModule:
             if count != weekday:
                 wdate += timedelta(days=(count - weekday + 7) % 7)
             self.win.setProperty("NextAired.%d.Date" % (count + 1), self.str_date(wdate, 'DropThisYear'))
-        from next_aired_dialog import NextAiredDialog
+        from .next_aired_dialog import NextAiredDialog
         today_style = self.addon.getSetting("TodayStyle") == 'true'
         scan_days = int(self.addon.getSetting("ScanDays2" if today_style else "ScanDays"))
         want_yesterday = self.addon.getSetting("WantYesterday") == 'true'
         eps_list = self.get_nextaired_listing(include_last_episode=want_yesterday)
         xml = "script-NextAired-TVGuide%s.xml" % (2 if today_style else "")
-        xml_path = self.addon.getAddonInfo('path').decode('utf-8')
+        xml_path = self.addon.getAddonInfo('path')
         dialog = NextAiredDialog(
             xml,
             xml_path,

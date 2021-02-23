@@ -27,7 +27,7 @@ elif DATE_FORMAT[0] == 'm':
 elif DATE_FORMAT[0] == 'y':
     DATE_FORMAT = '%y-%m-%d'
 
-NICE_DATE_FORMAT = xbmc.getRegion('datelong').lower().replace('%d%d', '%d').replace("'", "").decode('utf-8')
+NICE_DATE_FORMAT = xbmc.getRegion('datelong').lower().replace('%d%d', '%d').replace("'", "")
 for xx, yy in (('%a', '%(wday)s'), ('%b', '%(month)s'), ('%d', '%(day)s'), ('%y', '%(year)s'), ('%m', '%(mm)s')):
     NICE_DATE_FORMAT = NICE_DATE_FORMAT.replace(xx, yy)
 NICE_DATE_FORMAT = re.sub(r"%[a-z]", '%(unk)s', NICE_DATE_FORMAT)
@@ -45,21 +45,18 @@ except Exception:
 
 def log_msg(msg, loglevel=xbmc.LOGDEBUG):
     '''log message to kodi log'''
-    if isinstance(msg, unicode):
-        msg = msg.encode('utf-8')
+    msg = msg
     if DEBUG and loglevel == xbmc.LOGDEBUG:
-        loglevel = xbmc.LOGNOTICE
+        loglevel = xbmc.LOGINFO
     xbmc.log("%s --> %s" % (ADDON_ID, msg), level=loglevel)
 
 
 def log_exception(modulename, exceptiondetails):
     '''helper to properly log an exception'''
-    log_msg(format_exc(sys.exc_info()), xbmc.LOGDEBUG)
     log_msg("Exception in %s ! --> %s" % (modulename, exceptiondetails), xbmc.LOGWARNING)
 
 
 def process_method_on_list(method_to_run, items):
-    '''helper method that processes a method on each listitem with pooling if the system supports it'''
     all_items = []
     if SUPPORTS_POOL:
         pool = ThreadPool()
@@ -77,14 +74,14 @@ def process_method_on_list(method_to_run, items):
     return all_items
     
     
-def try_encode(text, encoding="utf-8"):
+def try_encode(text):
     try:
         return text.encode(encoding, "ignore")
     except:
         return text
 
 
-def try_decode(text, encoding="utf-8"):
+def try_decode(text):
     try:
         return text.decode(encoding, "ignore")
     except:

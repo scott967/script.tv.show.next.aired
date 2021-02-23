@@ -8,7 +8,7 @@
     Background service running the update task
 '''
 
-from utils import log_msg, ADDON_ID
+from .utils import log_msg, ADDON_ID
 import xbmc
 import xbmcaddon
 
@@ -18,11 +18,11 @@ class MainService:
 
     def __init__(self):
         addon = xbmcaddon.Addon(ADDON_ID)
-        addonname = addon.getAddonInfo('name').decode("utf-8")
-        addonversion = addon.getAddonInfo('version').decode("utf-8")
+        addonname = addon.getAddonInfo('name')
+        addonversion = addon.getAddonInfo('version')
         del addon
         kodimonitor = xbmc.Monitor()       
-        log_msg('%s version %s started' % (addonname, addonversion), xbmc.LOGNOTICE)
+        log_msg('%s version %s started' % (addonname, addonversion), xbmc.LOGINFO)
 
         while not kodimonitor.abortRequested():
             
@@ -32,4 +32,4 @@ class MainService:
 
         # Abort was requested while waiting. Do cleanup
         del kodimonitor
-        log_msg('%s version %s stopped' % (addonname, addonversion), xbmc.LOGNOTICE)
+        log_msg('%s version %s stopped' % (addonname, addonversion), xbmc.LOGINFO)

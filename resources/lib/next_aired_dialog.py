@@ -4,7 +4,7 @@ import xbmc
 import xbmcgui
 import xbmcaddon
 import time
-from utils import ADDON_ID, log_msg, KODI_VERSION, log_exception
+from .utils import ADDON_ID, log_msg, KODI_VERSION, log_exception
 
 
 class NextAiredDialog(xbmcgui.WindowXML):
@@ -46,8 +46,6 @@ class NextAiredDialog(xbmcgui.WindowXML):
             shift_cnt = 0
 
         self.cntr_nums = range(self.first_num, self.first_num + self.cntr_cnt)
-        for j in range(shift_cnt):
-            self.cntr_nums.append(self.cntr_nums.pop(0))
 
         self.set_properties()
         self.fill_containers()
@@ -103,8 +101,6 @@ class NextAiredDialog(xbmcgui.WindowXML):
             self.listitems[ndx].append(listitem)
 
     def fill_containers(self):
-        if self.today_style and self.want_yesterday:
-            self.cntr_nums.append(self.cntr_nums.pop(0))
         for c in self.cntr_nums:
             self.getControl(c).reset()
             self.getControl(c).addItems(self.listitems[c - self.first_num])
@@ -125,6 +121,7 @@ class NextAiredDialog(xbmcgui.WindowXML):
         elif controlID in self.cntr_nums:
             listitem = self.getControl(controlID).getSelectedItem()
             filename = 'ActivateWindow(Videos,%s,return)' % listitem.getProperty('Path')
+            log_msg(filename)
             xbmc.executebuiltin(filename)
 
     def onFocus(self, controlID):
